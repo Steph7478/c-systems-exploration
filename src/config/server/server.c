@@ -6,6 +6,8 @@
 #include "../http/http.h"
 #include "../../web/controllers/controller.h"
 
+extern unsigned __int64 get_cpu_cycles();
+
 ClientQueue clientQueue;
 
 void start_server()
@@ -27,7 +29,6 @@ void start_server()
     printf("Server running at http://localhost:5000\n");
 
     queue_init(&clientQueue);
-
     register_routes();
 
     for (int i = 0; i < THREAD_COUNT; i++)
@@ -42,7 +43,8 @@ void start_server()
         SOCKET client = accept(sock, NULL, NULL);
         if (client != INVALID_SOCKET)
         {
-            enqueue(&clientQueue, client);
+            unsigned __int64 entry_timestamp = get_cpu_cycles();
+            enqueue(&clientQueue, client, entry_timestamp);
         }
     }
 }
